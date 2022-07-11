@@ -1,0 +1,7 @@
+name=Crane Game
+author=John Bentley Creative
+description=Your favorite worst nightmare is here! Grab as many toys as you can before time runs out
+bundleID=com.johnbentleycreative.CraneGame
+version=1.0
+buildNumber=100
+imagePath=system-assets
