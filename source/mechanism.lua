@@ -5,19 +5,15 @@ import "extension"
 
 class('Mechanism').extends(gfx.sprite)
 
-function Mechanism:init(x, y, image)
-	self.moveSpeed = 2
-	self:moveTo(x, y)
-	self:setImage(image)	
-	self:setCollideRect(0, 0, self:getSize())
+function Mechanism:init(x, y, image, player)
+    self.moveSpeed = 2
+    self:moveTo(x, y)
+    self:setImage(image)	
+    self:setCollideRect(0, 0, self:getSize())
+    self.player = player -- Add a reference to the Player object
 end
 
 function Mechanism:update()
 	Mechanism.super.update(self)
-	if pd.buttonIsPressed(pd.kButtonLeft) then
-		self:moveWithCollisions(self.x - self.moveSpeed, self.y)
-	end
-	if pd.buttonIsPressed(pd.kButtonRight) then
-		self:moveWithCollisions(self.x + self.moveSpeed, self.y)
-	end
+	self:moveTo(self.player.x, self.y) -- Move to the same X position as the Player
 end

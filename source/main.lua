@@ -11,10 +11,11 @@ import "lifecycle"
 import "simulator"
 import "player"
 import "wall"
-import "mechanism"
 import "toy"
 import "goal"
+import "mechanism"
 import "extension"
+import "cable"
 import "scoreDisplay"
 
 local pd <const> = playdate
@@ -74,7 +75,7 @@ function setCharacters()
 
     -- Initialize mechanism and extension
     local mechanismImage = gfx.image.new("images/mechanism")
-    mechanismInstance = Mechanism(200, 85, mechanismImage)
+    mechanismInstance = Mechanism(200, 85, mechanismImage, playerInstance)
     mechanismInstance:add()
 
     local extensionImage = gfx.image.new(5, 200)
@@ -82,7 +83,7 @@ function setCharacters()
     extensionInstance:add()
 
     local cableImage = gfx.image.new("images/cable")
-    cableInstance = Mechanism(250, 92, cableImage)
+    cableInstance = Cable(250, 92, cableImage, playerInstance)
     cableInstance:add()
 end
 

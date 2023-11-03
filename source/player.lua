@@ -10,6 +10,7 @@ function Player:init(x, y, image)
 	self:moveTo(x, y)
 	self:setImage(image)
 	self:setCollideRect(0, 0, self:getSize())
+	self.isMoving = false
 end
 
 function checkToyCollisions(collisions)
@@ -31,6 +32,7 @@ function Player:update()
 	-- toy collision, we reset the boolean isToyTouching.
 	if pd.buttonIsPressed(pd.kButtonLeft) then
 		local actualX, actualY, collisions, length = self:moveWithCollisions(self.x - self.moveSpeed, self.y)
+		self.isMoving = true
 
 		if length > 0 then
 			checkToyCollisions(collisions)
@@ -40,6 +42,7 @@ function Player:update()
 	end
 	if pd.buttonIsPressed(pd.kButtonRight) then
 		local actualX, actualY, collisions, length = self:moveWithCollisions(self.x + self.moveSpeed, self.y)
+		self.isMoving = true
 
 		if length > 0 then
 			checkToyCollisions(collisions)
@@ -49,6 +52,7 @@ function Player:update()
 	end
 	if pd.buttonIsPressed(pd.kButtonUp) then
 		local actualX, actualY, collisions, length = self:moveWithCollisions(self.x, self.y - self.moveSpeed)
+		self.isMoving = true
 
 		if length > 0 then
 			checkToyCollisions(collisions)
@@ -58,6 +62,7 @@ function Player:update()
 	end
 	if pd.buttonIsPressed(pd.kButtonDown) then
 		local actualX, actualY, collisions, length = self:moveWithCollisions(self.x, self.y + self.moveSpeed)
+		self.isMoving = true
 
 		if length > 0 then
 			checkToyCollisions(collisions)
