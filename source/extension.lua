@@ -4,12 +4,10 @@ local gfx <const> = pd.graphics
 class('Extension').extends(gfx.sprite)
 
 function Extension:init(x, y, width, height, image)
-	Extension.super.init(self)
-	self:moveTo(x, y)
-    self:setZIndex(-1000)
+	Extension.super.init(self)	
 	gfx.pushContext(extension)
     gfx.setColor(0, 0, 0, 1)
-    gfx.fillRect(0, 0, width, height)
+    gfx.fillRect(x, y, width, height)
 	gfx.popContext()
 	
 	self:setImage(image)	
