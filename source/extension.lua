@@ -5,11 +5,11 @@ class('Extension').extends(gfx.sprite)
 
 function Extension:init(x, y, width, height, image)
 	Extension.super.init(self)
-
 	self:moveTo(x, y)
     self:setZIndex(-1000)
 	gfx.pushContext(extension)
-        gfx.fillRect(0, 0, width, height)
+    gfx.setColor(0, 0, 0, 1)
+    gfx.fillRect(0, 0, width, height)
 	gfx.popContext()
 	
 	self:setImage(image)	

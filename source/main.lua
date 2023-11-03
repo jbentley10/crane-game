@@ -78,7 +78,7 @@ function setCharacters()
     mechanismInstance = Mechanism(200, 85, mechanismImage, playerInstance)
     mechanismInstance:add()
 
-    local extensionImage = gfx.image.new(5, 200)
+    local extensionImage = gfx.image.new(5, 200)    
     extensionInstance = Extension(200, 105, 10, 10, extensionImage)
     extensionInstance:add()
 
