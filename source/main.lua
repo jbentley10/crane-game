@@ -4,6 +4,7 @@ import "CoreLibs/graphics"
 import "CoreLibs/sprites"
 import "CoreLibs/timer"
 import "CoreLibs/crank"
+import "CoreLibs/ui"
 
 -- Libraries
 import "scripts/libraries/utilities"
@@ -11,9 +12,14 @@ import "scripts/libraries/lifecycle"
 import "scripts/libraries/simulator"
 import "scripts/libraries/button"
 import "scripts/libraries/crank"
+import "scripts/libraries/SceneManager"
 
 -- Game
 import "scripts/game/player"
+-- Title/UIs
+import "scripts/title/gameOverScene"
+import "scripts/title/titleScene"
+import "scripts/title/menu"
 -- Entities
 import "scripts/game/entities/wall"
 import "scripts/game/entities/toy"
@@ -27,6 +33,8 @@ import "scripts/game/npcs/scoreDisplay"
 local pd <const> = playdate
 local gfx <const> = pd.graphics
 local util <const> = utilities
+
+SCENE_MANAGER = SceneManager()
 
 -- Instantiate game variables
 local playTimer = nil
@@ -48,163 +56,155 @@ local smallToyImage = gfx.image.new("images/toy--small")
 local backgroundImage = gfx.image.new("images/background")
 
 -- Functions
-local function resetTimer()
-	playTimer = playdate.timer.new(playTime, playTime, 0, playdate.easingFunctions.linear)
-end
+-- local function resetTimer()
+-- 	playTimer = playdate.timer.new(playTime, playTime, 0, playdate.easingFunctions.linear)
+-- end
 
--- GAME
-function resetGame() 
-	gameEndTextSprite:remove()
-	print('button A pressed')
-	resetTimer()
-	moveToy()
-	score = 0
-	gameOver = false
-	gameOverShown = false
-	setCharacters()
-end
+-- -- GAME
+-- function resetGame() 
+-- 	gameEndTextSprite:remove()
+-- 	print('button A pressed')
+-- 	resetTimer()
+-- 	moveToy()
+-- 	score = 0
+-- 	gameOver = false
+-- 	gameOverShown = false
+-- 	setCharacters()
+-- end
 
-function moveToy()
-	local yField = 180
-	local randX = math.random(120, 380)
-	smallToyInstance:moveTo(randX, yField)
-end
+-- function moveToy()
+-- 	local yField = 180
+-- 	local randX = math.random(120, 380)
+-- 	smallToyInstance:moveTo(randX, yField)
+-- end
 
 -- Input handlers
-local myInputHandlers = {
-	-- If the player holds down the A button, swap out the sprite image
-	AButtonHeld = function()
-		if isTouchingToy == true then
-			playerInstance:setImage(playerHoldingImage)
-			smallToyInstance:remove()
-		end
-	end,
+-- local myInputHandlers = {
+-- 	-- If the player holds down the A button, swap out the sprite image
+-- 	AButtonHeld = function()
+-- 		if isTouchingToy == true then
+-- 			playerInstance:setImage(playerHoldingImage)
+-- 			smallToyInstance:remove()
+-- 		end
+-- 	end,
 
-	-- If the player releases the A button, swap out the sprite image
-	-- and make the toy fall
-	AButtonUp = function()
-		-- local toyCubicY = toyCubicAnimator:currentValue()
+-- 	-- If the player releases the A button, swap out the sprite image
+-- 	-- and make the toy fall
+-- 	AButtonUp = function()
+-- 		-- local toyCubicY = toyCubicAnimator:currentValue()
 
-		playerInstance:setImage(playerImage)
-		smallToyInstance:add()
-		smallToyInstance:moveTo(playerInstance.x, 200)
-	end
-}
+-- 		playerInstance:setImage(playerImage)
+-- 		smallToyInstance:add()
+-- 		smallToyInstance:moveTo(playerInstance.x, 200)
+-- 	end
+-- }
 
-pd.inputHandlers.push(myInputHandlers)
+-- pd.inputHandlers.push(myInputHandlers)
 
--- CHARACTERS
-function setCharacters()
-	-- Initialize player
-	playerInstance = Player(200, 125, playerImage)
-	playerInstance:add()
+-- -- CHARACTERS
+-- function setCharacters()
+-- 	-- Initialize player
+-- 	playerInstance = Player(200, 125, playerImage)
+-- 	playerInstance:add()
 
-	-- Initialize mechanism and extension
-	local mechanismImage = gfx.image.new("images/mechanism")
-	mechanismInstance = Mechanism(200, 85, mechanismImage, playerInstance)
-	mechanismInstance:add()
+-- 	-- Initialize mechanism and extension
+-- 	local mechanismImage = gfx.image.new("images/mechanism")
+-- 	mechanismInstance = Mechanism(200, 85, mechanismImage, playerInstance)
+-- 	mechanismInstance:add()
 
-	local extensionImage = gfx.image.new(5, 200)
-	extensionInstance = Extension(200, 105, 10, 10, extensionImage)
-	extensionInstance:add()
+-- 	local extensionImage = gfx.image.new(5, 200)
+-- 	extensionInstance = Extension(200, 105, 10, 10, extensionImage)
+-- 	extensionInstance:add()
 
-	local cableImage = gfx.image.new("images/cable")
-	cableInstance = Cable(250, 92, cableImage, playerInstance)
-	cableInstance:add()
-end
+-- 	local cableImage = gfx.image.new("images/cable")
+-- 	cableInstance = Cable(250, 92, cableImage, playerInstance)
+-- 	cableInstance:add()
+-- end
 
-function removeCharacters()
-	print("removing characters...")
-	mechanismInstance:remove()
-	playerInstance:remove()
-	cableInstance:remove()
-	smallToyInstance:remove()
-end
+-- function removeCharacters()
+-- 	print("removing characters...")
+-- 	mechanismInstance:remove()
+-- 	playerInstance:remove()
+-- 	cableInstance:remove()
+-- 	smallToyInstance:remove()
+-- end
 
--- UI
-function showGameOver() 
-	print('If not gameOverShown then')
-	gameOver = true
-	removeCharacters()
-	gameEndTextSprite = gfx.sprite.new(gameEndTextImage)
-	gameEndTextSprite:add()
-	gameEndTextSprite:setZIndex(100)
-	gameEndTextSprite:moveTo(200, 50)
-	gameOverShown = true
-end
+-- -- UI
+-- function showScoreDisplay()
+-- 	scoreDisplayInstance = ScoreDisplay(200, 125, 200, 100, score)
+-- 	scoreDisplayInstance:add()
+-- end
 
-function showScoreDisplay()
-	scoreDisplayInstance = ScoreDisplay(200, 125, 200, 100, score)
-	scoreDisplayInstance:add()
-end
-
-function removeScoreDisplay()
-	scoreDisplayInstance:remove()
-end
+-- function removeScoreDisplay()
+-- 	scoreDisplayInstance:remove()
+-- end
 
 
 -- START GAME / GAME LOOP
-function myGameSetUp()
-	print("Starting game.")	
-	-- Set up the toy sprite
-	math.randomseed(playdate.getSecondsSinceEpoch()) -- Creates some randomness
+-- function myGameSetUp()
+-- 	print("Starting game.")	
+-- 	titleScene()
+-- 	-- Set up the toy sprite
+-- 	math.randomseed(playdate.getSecondsSinceEpoch()) -- Creates some randomness
 
-	setCharacters()
+-- 	setCharacters()
 
-	local gameEndTextSprite = nil
+-- 	local gameEndTextSprite = nil
 
-	-- Initialize walls
-	local wallLeft = Wall(15, 130, 20, 150)
-	local wallRight = Wall(390, 130, 20, 150)
-	local wallTop = Wall(0, 0, 800, 120)
-	local wallBottom = Wall(0, 270, 800, 120)
+-- 	-- Initialize walls
+-- 	local wallLeft = Wall(15, 130, 20, 150)
+-- 	local wallRight = Wall(390, 130, 20, 150)
+-- 	local wallTop = Wall(0, 0, 800, 120)
+-- 	local wallBottom = Wall(0, 270, 800, 120)
 
-	wallLeft:add()
-	wallRight:add()
-	wallTop:add()
-	wallBottom:add()
+-- 	wallLeft:add()
+-- 	wallRight:add()
+-- 	wallTop:add()
+-- 	wallBottom:add()
 
-	-- Initialize goal
-	local goalInstance = Goal(60, 180, 60, 45)
-	goalInstance:add()
+-- 	-- Initialize goal
+-- 	local goalInstance = Goal(60, 180, 60, 45)
+-- 	goalInstance:add()
 
-	-- Initialize collectibles
-	smallToyInstance = Toy(smallToyImage)
-	smallToyInstance:add()
+-- 	-- Initialize collectibles
+-- 	smallToyInstance = Toy(smallToyImage)
+-- 	smallToyInstance:add()
 
-	assert(backgroundImage)
+-- 	assert(backgroundImage)
 
-	gfx.sprite.setBackgroundDrawingCallback(
-		function(x, y, width, height)
-			gfx.setClipRect(x, y, width, height)
-			backgroundImage:draw(0, 0)
-			gfx.clearClipRect()
-		end
-	)
+-- 	gfx.sprite.setBackgroundDrawingCallback(
+-- 		function(x, y, width, height)
+-- 			gfx.setClipRect(x, y, width, height)
+-- 			backgroundImage:draw(0, 0)
+-- 			gfx.clearClipRect()
+-- 		end
+-- 	)
 
-	resetTimer()
-	moveToy()
-end
+-- 	resetTimer()
+-- 	moveToy()
+-- end
 
-myGameSetUp()
+-- myGameSetUp()
+print("Starting game.")	
+TitleScene()
 
 function playdate.update()
-	if not gameOver then
+	-- if not gameOver then
 		gfx.sprite.update()
-		-- Update timers at the end
+	-- 	-- Update timers at the end
 		playdate.timer.updateTimers()
 
-		-- Display timer
-		gfx.drawText("Time: " .. math.ceil(playTimer.value / 1000), 5, 217)
-		gfx.drawText("Score: " .. score, 100, 217)
+	-- 	-- Display timer
+	-- 	gfx.drawText("Time: " .. math.ceil(playTimer.value / 1000), 5, 217)
+	-- 	gfx.drawText("Score: " .. score, 100, 217)
 
-		if playTimer.value == 0 then
-			showGameOver()
-		end
-	end
-	if gameOver then
-		if pd.buttonIsPressed(pd.kButtonA) then
-			resetGame()
-		end
-	end
+	-- 	if playTimer.value == 0 then
+	-- 		gameOverInstance = gameOverScene()
+	-- 	end
+	-- end
+	-- if gameOver then
+	-- 	if pd.buttonIsPressed(pd.kButtonA) then
+	-- 		resetGame()
+	-- 	end
+	-- end
 end
