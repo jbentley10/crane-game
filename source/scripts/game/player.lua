@@ -1,7 +1,7 @@
 local pd <const> = playdate
 local gfx <const> = pd.graphics
 
-import "toy"
+import "entities/toy"
 
 class('Player').extends(gfx.sprite)
 

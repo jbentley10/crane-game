@@ -7,28 +7,33 @@ import "CoreLibs/crank"
 
 -- Libraries
 import "scripts/libraries/utilities"
+import "scripts/libraries/lifecycle"
+import "scripts/libraries/simulator"
+import "scripts/libraries/button"
+import "scripts/libraries/crank"
 
 -- Game
-import "scripts/game/button"
-import "scripts/game/crank"
-import "scripts/game/lifecycle"
-import "scripts/game/simulator"
 import "scripts/game/player"
-import "scripts/game/wall"
-import "scripts/game/toy"
-import "scripts/game/goal"
-import "scripts/game/mechanism"
-import "scripts/game/extension"
-import "scripts/game/cable"
-import "scripts/game/scoreDisplay"
+-- Entities
+import "scripts/game/entities/wall"
+import "scripts/game/entities/toy"
+import "scripts/game/entities/goal"
+import "scripts/game/entities/mechanism"
+import "scripts/game/entities/extension"
+import "scripts/game/entities/cable"
+-- NPCS
+import "scripts/game/npcs/scoreDisplay"
 
 local pd <const> = playdate
 local gfx <const> = pd.graphics
 local util <const> = utilities
 
+-- Instantiate game variables
 local playTimer = nil
 local playTime = 3 * 1000
 score = 0
+gameOver = false
+gameOverShown = false
 isTouchingToy = false
 local gameOver = false -- Flag to indicate if the game is over
 
@@ -39,17 +44,30 @@ local gameOver = false -- Flag to indicate if the game is over
 local playerImage = gfx.image.new("images/player")
 local playerHoldingImage = gfx.image.new("images/player--holding")
 local gameEndTextImage = gfx.image.new("images/ui/game-over")
+local smallToyImage = gfx.image.new("images/toy--small")
+local backgroundImage = gfx.image.new("images/background")
 
 -- Functions
 local function resetTimer()
 	playTimer = playdate.timer.new(playTime, playTime, 0, playdate.easingFunctions.linear)
 end
 
+-- GAME
+function resetGame() 
+	gameEndTextSprite:remove()
+	print('button A pressed')
+	resetTimer()
+	moveToy()
+	score = 0
+	gameOver = false
+	gameOverShown = false
+	setCharacters()
+end
+
 function moveToy()
 	local yField = 180
 	local randX = math.random(120, 380)
 	smallToyInstance:moveTo(randX, yField)
-	--mediumToyInstance:moveTo(randX, yField)
 end
 
 -- Input handlers
@@ -75,6 +93,7 @@ local myInputHandlers = {
 
 pd.inputHandlers.push(myInputHandlers)
 
+-- CHARACTERS
 function setCharacters()
 	-- Initialize player
 	playerInstance = Player(200, 125, playerImage)
@@ -102,8 +121,31 @@ function removeCharacters()
 	smallToyInstance:remove()
 end
 
+-- UI
+function showGameOver() 
+	print('If not gameOverShown then')
+	gameOver = true
+	removeCharacters()
+	gameEndTextSprite = gfx.sprite.new(gameEndTextImage)
+	gameEndTextSprite:add()
+	gameEndTextSprite:setZIndex(100)
+	gameEndTextSprite:moveTo(200, 50)
+	gameOverShown = true
+end
+
+function showScoreDisplay()
+	scoreDisplayInstance = ScoreDisplay(200, 125, 200, 100, score)
+	scoreDisplayInstance:add()
+end
+
+function removeScoreDisplay()
+	scoreDisplayInstance:remove()
+end
+
+
+-- START GAME / GAME LOOP
 function myGameSetUp()
-	print("Starting game.")
+	print("Starting game.")	
 	-- Set up the toy sprite
 	math.randomseed(playdate.getSecondsSinceEpoch()) -- Creates some randomness
 
@@ -127,15 +169,9 @@ function myGameSetUp()
 	goalInstance:add()
 
 	-- Initialize collectibles
-	local smallToyImage = gfx.image.new("images/toy--small")
-	local mediumToyImage = gfx.image.new("images/toy--medium")
 	smallToyInstance = Toy(smallToyImage)
-	--mediumToyInstance = Toy(mediumToyImage)
-
 	smallToyInstance:add()
-	--mediumToyInstance:add()
 
-	local backgroundImage = gfx.image.new("images/background")
 	assert(backgroundImage)
 
 	gfx.sprite.setBackgroundDrawingCallback(
@@ -152,19 +188,8 @@ end
 
 myGameSetUp()
 
-function showScoreDisplay()
-	scoreDisplayInstance = ScoreDisplay(200, 125, 200, 100, score)
-	scoreDisplayInstance:add()
-end
-
-function removeScoreDisplay()
-	scoreDisplayInstance:remove()
-end
-
 function playdate.update()
-	local gameOverShown = false
-	if gameOver == false then
-		print('If not gameOver then')
+	if not gameOver then
 		gfx.sprite.update()
 		-- Update timers at the end
 		playdate.timer.updateTimers()
@@ -173,32 +198,13 @@ function playdate.update()
 		gfx.drawText("Time: " .. math.ceil(playTimer.value / 1000), 5, 217)
 		gfx.drawText("Score: " .. score, 100, 217)
 
-		if playTimer.value <= 0 then
-			removeCharacters()
-			gameOver = true -- Set the game over flag when the timer runs out
+		if playTimer.value == 0 then
+			showGameOver()
 		end
 	end
 	if gameOver then
-		print('If gameOver then')
-		-- Draw the game over screen
-		if gameOverShown == false then
-			print('If not gameOverShown then')
-			print(gameOverShown)
-			gameEndTextSprite = gfx.sprite.new(gameEndTextImage)
-			gameEndTextSprite:add()
-			gameEndTextSprite:setZIndex(100)
-			gameEndTextSprite:moveTo(200, 50)
-			gameOverShown = true
-		end
-
 		if pd.buttonIsPressed(pd.kButtonA) then
-			gameEndTextSprite:remove()
-			print('button A pressed')
-			resetTimer()
-			moveToy()
-			score = 0
-			gameOver = false
-			setCharacters()
+			resetGame()
 		end
 	end
 end
