@@ -4,28 +4,20 @@ local gfx <const> = pd.graphics
 class('GameScene').extends(gfx.sprite)
 
 function GameScene:init()
-  print('Starting game...')
-  -- Instantiate game variables
-  local playTimer = nil
-  local playTime = 3 * 1000
-  score = 0
-  gameOver = false
-  gameOverShown = false
-  isTouchingToy = false
-  local gameOver = false -- Flag to indicate if the game is over
+	print('Starting gameScene...')
 
-  -- Set up images
-  local smallToyImage = gfx.image.new("images/toy--small")
-  local backgroundImage = gfx.image.new("images/background")
+	-- Set up images
+	local smallToyImage = gfx.image.new("images/toy--small")
+	local backgroundImage = gfx.image.new("images/background")
 
-  -- Set up the toy sprite
+	-- Set up the toy sprite
 	math.randomseed(playdate.getSecondsSinceEpoch()) -- Creates some randomness
 
 	setCharacters()
 
 	local gameEndTextSprite = nil
 
--- 	-- Initialize walls
+	-- 	-- Initialize walls
 	local wallLeft = Wall(15, 130, 20, 150)
 	local wallRight = Wall(390, 130, 20, 150)
 	local wallTop = Wall(0, 0, 800, 120)
@@ -36,11 +28,11 @@ function GameScene:init()
 	wallTop:add()
 	wallBottom:add()
 
-  -- Initialize goal
+	-- Initialize goal
 	local goalInstance = Goal(60, 180, 60, 45)
 	goalInstance:add()
 
-  -- Initialize collectibles
+	-- Initialize collectibles
 	smallToyInstance = Toy(smallToyImage)
 	smallToyInstance:add()
 
@@ -54,6 +46,7 @@ function GameScene:init()
 		end
 	)
 
+	print('running reset timer...')
 	resetTimer()
 	moveToy()
 end
@@ -64,7 +57,7 @@ function resetTimer()
 end
 
 -- -- GAME
-function resetGame() 
+function resetGame()
 	gameEndTextSprite:remove()
 	print('button A pressed')
 	resetTimer()
@@ -76,57 +69,57 @@ function resetGame()
 end
 
 function moveToy()
-  local yField = 180
-  local randX = math.random(120, 380)
-  smallToyInstance:moveTo(randX, yField)
+	local yField = 180
+	local randX = math.random(120, 380)
+	smallToyInstance:moveTo(randX, yField)
 end
 
 -- -- CHARACTERS
 function setCharacters()
-  local playerHoldingImage = gfx.image.new("images/player--holding")
+	local playerHoldingImage = gfx.image.new("images/player--holding")
 
 	-- Initialize player
-  local playerImage = gfx.image.new("images/player")
+	local playerImage = gfx.image.new("images/player")
 	playerInstance = Player(200, 125, playerImage)
 	playerInstance:add()
 
-  -- Initialize mechanism and extension
-  local mechanismImage = gfx.image.new("images/mechanism")
-  mechanismInstance = Mechanism(200, 85, mechanismImage, playerInstance)
-  mechanismInstance:add()
+	-- Initialize mechanism and extension
+	local mechanismImage = gfx.image.new("images/mechanism")
+	mechanismInstance = Mechanism(200, 85, mechanismImage, playerInstance)
+	mechanismInstance:add()
 
-  local extensionImage = gfx.image.new(5, 200)
-  extensionInstance = Extension(200, 105, 10, 10, extensionImage)
-  extensionInstance:add()
+	local extensionImage = gfx.image.new(5, 200)
+	extensionInstance = Extension(200, 105, 10, 10, extensionImage)
+	extensionInstance:add()
 
-  local cableImage = gfx.image.new("images/cable")
-  cableInstance = Cable(250, 92, cableImage, playerInstance)
-  cableInstance:add()
+	local cableImage = gfx.image.new("images/cable")
+	cableInstance = Cable(250, 92, cableImage, playerInstance)
+	cableInstance:add()
 
-  -- Input handlers
-  local myInputHandlers = {
-    -- If the player holds down the A button, swap out the sprite image
-    AButtonHeld = function()
-      if isTouchingToy == true then
-        playerInstance:setImage(playerHoldingImage)
-        smallToyInstance:remove()
-      end
-    end,
+	-- Input handlers
+	local myInputHandlers = {
+		-- If the player holds down the A button, swap out the sprite image
+		AButtonHeld = function()
+			if isTouchingToy == true then
+				playerInstance:setImage(playerHoldingImage)
+				smallToyInstance:remove()
+			end
+		end,
 
-    -- If the player releases the A button, swap out the sprite image
-    -- and make the toy fall
-    AButtonUp = function()
-      -- local toyCubicY = toyCubicAnimator:currentValue()
+		-- If the player releases the A button, swap out the sprite image
+		-- and make the toy fall
+		AButtonUp = function()
+			-- local toyCubicY = toyCubicAnimator:currentValue()
 
-      playerInstance:setImage(playerImage)
-      smallToyInstance:add()
-      smallToyInstance:moveTo(playerInstance.x, 200)
-      -- Animations
-      toyCubicAnimator = gfx.animator.new(2000, playerInstance.y, 300, pd.easingFunctions.inOutCubic)
-    end
-  }
+			playerInstance:setImage(playerImage)
+			smallToyInstance:add()
+			smallToyInstance:moveTo(playerInstance.x, 200)
+			-- Animations
+			toyCubicAnimator = gfx.animator.new(2000, playerInstance.y, 300, pd.easingFunctions.inOutCubic)
+		end
+	}
 
-  pd.inputHandlers.push(myInputHandlers)
+	pd.inputHandlers.push(myInputHandlers)
 end
 
 function removeCharacters()
@@ -148,15 +141,32 @@ function removeScoreDisplay()
 end
 
 function pd.update()
+	-- Calculate the time elapsed since the last frame
+	local currentTime = pd.getTime()
+	local deltaTime = currentTime.second - lastTime.second
+	lastTime = currentTime
+
+	-- UPDATE SPRITES
 	-- if not gameOver then
-		gfx.sprite.update()
-	-- 	-- Update timers at the end
-		pd.timer.updateTimers()
+	gfx.sprite.update()
 
-	-- 	-- Display timer
-	-- 	gfx.drawText("Time: " .. math.ceil(playTimer.value / 1000), 5, 217)
-	-- 	gfx.drawText("Score: " .. score, 100, 217)
+	-- UPDATE TIMER
+	-- Decrease playTimer by the time elapsed since the last frame
+	if playTimer then
+			playTimer.value = playTimer.value - deltaTime
+			if playTimer.value < 0 then playTimer.value = 0 end
+	end
 
+	-- Update timers at the end
+	pd.timer.updateTimers()
+
+	-- Display timer
+	if playTimer then 
+			gfx.drawText("Time: " .. math.ceil(playTimer.value / 1000), 5, 217)
+			gfx.drawText("Score: " .. score, 100, 217)
+	end
+
+	-- GAME OVER
 	-- 	if playTimer.value == 0 then
 	-- 		gameOverInstance = gameOverScene()
 	-- 	end

@@ -34,5 +34,16 @@ import "scripts/game/npcs/scoreDisplay"
 SCENE_MANAGER = SceneManager()
 
 -- myGameSetUp()
-print("Starting game.")	
+print("Starting game.")
+
+-- Instantiate game variables
+playTimer = nil
+playTime = 45 * 1000
+lastTime = playdate.getTime() -- Store the current time
+score = 0
+gameOver = false
+gameOverShown = false
+isTouchingToy = false
+gameOver = false -- Flag to indicate if the game is over
+
 TitleScene()
